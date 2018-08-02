@@ -155,19 +155,20 @@ const createUniqueLinks = (lots: Array<Lottery>) => {
 
 };
 
-const getPassedSteps = (theLot: Lottery, lots: Array<Lottery>, links: Array<LotteryLink>) => {
+
+const getPassedVerticals = (theLot: Lottery, lots: Array<Lottery>, links: Array<LotteryLink>) => {
 
   const passedVerticals: Array<LadderStep> = [];
   let id = theLot.id;
   for (let pos = 0; pos < LOTTERY_HEIGHT; pos++) {
 
     const nextLink = links.find(l => l.pos === pos &&
-                                     (l.left.id === id || l.right.id === id));
+      (l.left.id === id || l.right.id === id));
     if (nextLink) {
       id = nextLink.left.id === id + 1 ? nextLink.left.id : nextLink.right.id;
     }
 
-    const step = new  LadderStep();
+    const step = new LadderStep();
     step.id = id;
     step.pos = pos;
     passedVerticals.push(step);
@@ -188,7 +189,7 @@ export class AppComponent {
   links: LotteryLink[] = [];
   entered = false;
   theLot: Lottery = null;
-  
+
   // コンストラクタ
   constructor() {
     this.lots = createLots();
@@ -207,17 +208,18 @@ export class AppComponent {
     this.theLot = null;
   }
 
+  // 縦の通り道確認
   isPassedVerticalLine(theStep: LadderStep) {
 
-    if(!this.entered){
+    if (!this.entered) {
       return false;
     }
-    return !!getPassedSteps(this.theLot, this.lots, this.links)
-            .find(s => s.id === theStep.id && s.pos === theStep.pos);
+    return !!getPassedVerticals(this.theLot, this.lots, this.links)
+      .find(s => s.id === theStep.id && s.pos === theStep.pos);
 
   }
 
-  // 段が接続を持っているかどうか 
+  // 段が接続を持っているかどうか
   hasLink(step: LadderStep) {
     return this.links.some(l => l.left.id === step.id && step.pos === l.pos);
   }
