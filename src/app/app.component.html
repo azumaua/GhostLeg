@@ -3,11 +3,16 @@
     <text attr.x="{{x * 80}}" y="35" font-size="25">
       {{lot.selector}}
     </text>
-    <g stroke="green" stroke-width="2" fill="none" (mouseenter)="onEnter()" (mouseleave)="onLeave()">
+    <g stroke="green" stroke-width="2" fill="none" (mouseenter)="onEnter(lot)" (mouseleave)="onLeave()">
       <ng-container *ngFor="let step of lot.steps; let y = index">
-        <line attr.x1="{{ x * 80 }}" attr.y1="{{y * 50 + 50 }}" attr.x2="{{ x * 80}}" attr.y2="{{y * 50 + 150}}" />
-        <ng-container *ngIf="hasLink(lot, step)">
-          <line attr.x1="{{ x * 80}}" attr.y1="{{y * 50 + 100 }}" attr.x2="{{ (x + 1) * 80}}" attr.y2="{{y * 50 + 100}}" />
+        <g>
+          <line [class.passed-line]="isPassedVerticalLine(step)" attr.x1="{{ x * 80 }}" attr.y1="{{y * 50 + 50 }}" attr.x2="{{ x * 80}}"
+            attr.y2="{{y * 50 + 150}}" />
+        </g>
+        <ng-container *ngIf="hasLink(step)">
+          <g>
+            <line attr.x1="{{ x * 80}}" attr.y1="{{y * 50 + 100 }}" attr.x2="{{ (x + 1) * 80}}" attr.y2="{{y * 50 + 100}}" />
+          </g>
         </ng-container>
       </ng-container>
     </g>

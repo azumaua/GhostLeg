@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { debug } from 'util';
 
 // あみだくじを引く人
 const LOTTERY_SELECTORS = [
@@ -19,6 +20,7 @@ const LINK_COUNT = LOTTERY_SELECTORS.length * 3;
 
 // あみだの段
 class LadderStep {
+  id = 0;
   pos = 0;
 }
 
@@ -85,6 +87,7 @@ const createLots = () => {
     const steps = Array(LOTTERY_HEIGHT).fill(0).map((_, idx) => {
       const step = new LadderStep();
       step.pos = idx;
+      step.id = lot.id;
       return step;
     });
     lot.steps = steps;
@@ -118,6 +121,13 @@ const createAllLinks = (lots: Array<Lottery>) => {
   return links;
 };
 
+// 一致判定
+const equivalentLink =
+  (x: LotteryLink, y: LotteryLink) =>
+    x.pos === y.pos &&
+    x.left.id === y.left.id &&
+    x.right.id === y.right.id;
+
 // 接続が隣り合っているかを判定
 const neighborLink =
   (x: LotteryLink, y: LotteryLink) =>
@@ -128,7 +138,7 @@ const neighborLink =
 const getAvailableLinks = (lots: Array<Lottery>, links: Array<LotteryLink>) => {
 
   const allLinks = createAllLinks(lots);
-  const availables = allLinks.filter(x => !links.some(y => neighborLink(x, y)));
+  const availables = allLinks.filter(x => !links.some(y => equivalentLink(x, y) || neighborLink(x, y)));
   return availables;
 
 };
@@ -145,6 +155,28 @@ const createUniqueLinks = (lots: Array<Lottery>) => {
 
 };
 
+const getPassedSteps = (theLot: Lottery, lots: Array<Lottery>, links: Array<LotteryLink>) => {
+
+  const passedVerticals: Array<LadderStep> = [];
+  let id = theLot.id;
+  for (let pos = 0; pos < LOTTERY_HEIGHT; pos++) {
+
+    const nextLink = links.find(l => l.pos === pos &&
+                                     (l.left.id === id || l.right.id === id));
+    if (nextLink) {
+      id = nextLink.left.id === id + 1 ? nextLink.left.id : nextLink.right.id;
+    }
+
+    const step = new  LadderStep();
+    step.id = id;
+    step.pos = pos;
+    passedVerticals.push(step);
+
+  }
+  return passedVerticals;
+
+};
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -154,7 +186,9 @@ const createUniqueLinks = (lots: Array<Lottery>) => {
 export class AppComponent {
   lots: Lottery[] = [];
   links: LotteryLink[] = [];
-
+  entered = false;
+  theLot: Lottery = null;
+  
   // コンストラクタ
   constructor() {
     this.lots = createLots();
@@ -162,16 +196,30 @@ export class AppComponent {
   }
 
   // マウスが入ったとき
-  onEnter() {
+  onEnter(theLot: Lottery) {
+    this.entered = true;
+    this.theLot = theLot;
   }
 
   // マウスが離れたとき
   onLeave() {
+    this.entered = false;
+    this.theLot = null;
+  }
+
+  isPassedVerticalLine(theStep: LadderStep) {
+
+    if(!this.entered){
+      return false;
+    }
+    return !!getPassedSteps(this.theLot, this.lots, this.links)
+            .find(s => s.id === theStep.id && s.pos === theStep.pos);
+
   }
 
   // 段が接続を持っているかどうか 
-  hasLink(lot: Lottery, step: LadderStep) {
-    return this.links.some(l => l.left.id === lot.id && step.pos === l.pos);
+  hasLink(step: LadderStep) {
+    return this.links.some(l => l.left.id === step.id && step.pos === l.pos);
   }
 
 }
