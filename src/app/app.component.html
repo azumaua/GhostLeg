@@ -1,18 +1,18 @@
 <svg width="100%" height="550px">
   <ng-container *ngFor="let lot of lots; let x = index">
     <text attr.x="{{x * 80}}" y="35" font-size="25">
-        {{lot.selector}}
+      {{lot.selector}}
     </text>
-    <g stroke="green" stroke-width="2" fill="none">
-      <line attr.x1="{{ x * 80 }}" y1="50" attr.x2="{{ x * 80}}" y2="500" />
+    <g stroke="green" stroke-width="2" fill="none" (mouseenter)="onEnter()" (mouseleave)="onLeave()">
       <ng-container *ngFor="let step of lot.steps; let y = index">
+        <line attr.x1="{{ x * 80 }}" attr.y1="{{y * 50 + 50 }}" attr.x2="{{ x * 80}}" attr.y2="{{y * 50 + 150}}" />
         <ng-container *ngIf="hasLink(lot, step)">
           <line attr.x1="{{ x * 80}}" attr.y1="{{y * 50 + 100 }}" attr.x2="{{ (x + 1) * 80}}" attr.y2="{{y * 50 + 100}}" />
         </ng-container>
       </ng-container>
     </g>
     <text attr.x="{{x * 80}}" y="520" font-size="15">
-        {{lot.winning ? 'あたり' : 'はずれ'}}
+      {{lot.winning ? 'あたり' : 'はずれ'}}
     </text>
   </ng-container>
 </svg>

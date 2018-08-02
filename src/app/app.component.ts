@@ -161,6 +161,14 @@ export class AppComponent {
     this.links = createUniqueLinks(this.lots);
   }
 
+  // マウスが入ったとき
+  onEnter() {
+  }
+
+  // マウスが離れたとき
+  onLeave() {
+  }
+
   // 段が接続を持っているかどうか 
   hasLink(lot: Lottery, step: LadderStep) {
     return this.links.some(l => l.left.id === lot.id && step.pos === l.pos);
