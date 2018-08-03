@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { debug } from 'util';
 
 // あみだくじを引く人
 const LOTTERY_SELECTORS = [
@@ -16,7 +15,7 @@ const WINNING_COUNT = 2;
 const LOTTERY_HEIGHT = 8;
 
 // 接続数
-const LINK_COUNT = LOTTERY_SELECTORS.length;
+const LINK_COUNT = LOTTERY_SELECTORS.length * 3;
 
 // あみだの段
 class LadderStep {
@@ -98,9 +97,7 @@ const createLots = () => {
 
 // 理論上可能なすべての接続を返す
 const createAllLinks = (lots: Array<Lottery>) => {
-
   const links: Array<LotteryLink> = [];
-
   for (let pos = 0; pos < LOTTERY_HEIGHT; pos++) {
     for (let id = 0; id < lots.length; id++) {
 
@@ -122,25 +119,19 @@ const createAllLinks = (lots: Array<Lottery>) => {
 };
 
 // 一致判定
-const equivalentLink =
-  (x: LotteryLink, y: LotteryLink) =>
-    x.pos === y.pos &&
-    x.left.id === y.left.id &&
-    x.right.id === y.right.id;
+const equivalentLink = (x: LotteryLink, y: LotteryLink) =>
+    x.pos === y.pos && x.left.id === y.left.id && x.right.id === y.right.id;
 
 // 接続が隣り合っているかを判定
 const neighborLink =
   (x: LotteryLink, y: LotteryLink) =>
-    x.pos === y.pos &&
-    ((y.right.id - x.left.id) === 0 || (x.right.id - y.left.id) === 0);
+    x.pos === y.pos && ((y.right.id - x.left.id) === 0 || (x.right.id - y.left.id) === 0);
 
 // 設置可能なすべての接続を返す
 const getAvailableLinks = (lots: Array<Lottery>, links: Array<LotteryLink>) => {
-
   const allLinks = createAllLinks(lots);
   const availables = allLinks.filter(x => !links.some(y => equivalentLink(x, y) || neighborLink(x, y)));
   return availables;
-
 };
 
 // ユニークな接続の作成
@@ -152,12 +143,10 @@ const createUniqueLinks = (lots: Array<Lottery>) => {
     links.push(link);
   }
   return links;
-
 };
 
 // 経路を計算します
 const getPaths = (theLot: Lottery, lots: Array<Lottery>, links: Array<LotteryLink>) => {
-
   const paths: Array<LadderStep> = [];
   let id = theLot.id;
   for (let pos = 0; pos <= LOTTERY_HEIGHT; pos++) {
@@ -167,14 +156,12 @@ const getPaths = (theLot: Lottery, lots: Array<Lottery>, links: Array<LotteryLin
     step.pos = pos;
     paths.push(step);
 
-    const nextLink = links.find(l => l.pos === pos &&
-      (l.left.id === id || l.right.id === id));
+    const nextLink = links.find(l => l.pos === pos && (l.left.id === id || l.right.id === id));
     if (nextLink) {
       id = nextLink.left.id === id ? nextLink.right.id : nextLink.left.id;
     }
-
   }
-  
+
   return paths;
 };
 
@@ -209,33 +196,33 @@ export class AppComponent {
   }
 
   // 縦の通り道確認
-  isPassedVerticalLine(id:number, pos: number) {
-
+  isPassedVerticalLine(id: number, pos: number) {
     if (!this.entered) {
       return false;
     }
 
-    return !!getPaths(this.theLot, this.lots, this.links)
-      .find(s => s.id === id && s.pos === pos);
-
+    return !!getPaths(this.theLot, this.lots, this.links).find(s => s.id === id && s.pos === pos);
   }
 
-    // 横の通り道確認
-    isPassedHorizontalLine(id:number, pos: number) {
-
-      if (!this.entered) {
-        return false;
-      }
-  
-      const paths = getPaths(this.theLot, this.lots, this.links);
-      const nextPath = paths.find(p => p.pos === pos + 1);      
-      if (nextPath && nextPath.id - id === 1) {
-        return true;
-      }
-
-      const prevPath = paths.find(p => p.pos === pos && p.id === id + 1);  
-      return !!prevPath;       
+  // 横の通り道確認
+  isPassedHorizontalLine(id: number, pos: number) {
+    if (!this.entered) {
+      return false;
     }
+
+    // 経路の取得
+    const paths = getPaths(this.theLot, this.lots, this.links);
+
+    // 右側へ進む場合
+    const nextPath = paths.find(p => p.pos === pos + 1);
+    if (nextPath && nextPath.id - id === 1) {
+      return true;
+    }
+
+    // 左側に進む場合
+    const prevPath = paths.find(p => p.pos === pos);
+    return prevPath && prevPath.id === id + 1;
+  }
 
   // 段が接続を持っているかどうか
   hasLink(step: LadderStep) {
