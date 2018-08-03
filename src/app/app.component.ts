@@ -16,7 +16,7 @@ const WINNING_COUNT = 2;
 const LOTTERY_HEIGHT = 8;
 
 // 接続数
-const LINK_COUNT = LOTTERY_SELECTORS.length * 3;
+const LINK_COUNT = LOTTERY_SELECTORS.length;
 
 // あみだの段
 class LadderStep {
@@ -155,27 +155,27 @@ const createUniqueLinks = (lots: Array<Lottery>) => {
 
 };
 
+// 経路を計算します
+const getPaths = (theLot: Lottery, lots: Array<Lottery>, links: Array<LotteryLink>) => {
 
-const getPassedVerticals = (theLot: Lottery, lots: Array<Lottery>, links: Array<LotteryLink>) => {
-
-  const passedVerticals: Array<LadderStep> = [];
+  const paths: Array<LadderStep> = [];
   let id = theLot.id;
-  for (let pos = 0; pos < LOTTERY_HEIGHT; pos++) {
-
-    const nextLink = links.find(l => l.pos === pos &&
-      (l.left.id === id || l.right.id === id));
-    if (nextLink) {
-      id = nextLink.left.id === id + 1 ? nextLink.left.id : nextLink.right.id;
-    }
+  for (let pos = 0; pos <= LOTTERY_HEIGHT; pos++) {
 
     const step = new LadderStep();
     step.id = id;
     step.pos = pos;
-    passedVerticals.push(step);
+    paths.push(step);
+
+    const nextLink = links.find(l => l.pos === pos &&
+      (l.left.id === id || l.right.id === id));
+    if (nextLink) {
+      id = nextLink.left.id === id ? nextLink.right.id : nextLink.left.id;
+    }
 
   }
-  return passedVerticals;
-
+  
+  return paths;
 };
 
 @Component({
@@ -209,15 +209,33 @@ export class AppComponent {
   }
 
   // 縦の通り道確認
-  isPassedVerticalLine(theStep: LadderStep) {
+  isPassedVerticalLine(id:number, pos: number) {
 
     if (!this.entered) {
       return false;
     }
-    return !!getPassedVerticals(this.theLot, this.lots, this.links)
-      .find(s => s.id === theStep.id && s.pos === theStep.pos);
+
+    return !!getPaths(this.theLot, this.lots, this.links)
+      .find(s => s.id === id && s.pos === pos);
 
   }
+
+    // 横の通り道確認
+    isPassedHorizontalLine(id:number, pos: number) {
+
+      if (!this.entered) {
+        return false;
+      }
+  
+      const paths = getPaths(this.theLot, this.lots, this.links);
+      const nextPath = paths.find(p => p.pos === pos + 1);      
+      if (nextPath && nextPath.id - id === 1) {
+        return true;
+      }
+
+      const prevPath = paths.find(p => p.pos === pos && p.id === id + 1);  
+      return !!prevPath;       
+    }
 
   // 段が接続を持っているかどうか
   hasLink(step: LadderStep) {

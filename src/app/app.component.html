@@ -6,14 +6,16 @@
     <g stroke="green" stroke-width="2" fill="none" (mouseenter)="onEnter(lot)" (mouseleave)="onLeave()">
       <ng-container *ngFor="let step of lot.steps; let y = index">
         <g>
-          <line [class.passed-line]="isPassedVerticalLine(step)" attr.x1="{{ x * 80 }}" attr.y1="{{y * 50 + 50 }}" attr.x2="{{ x * 80}}"
-            attr.y2="{{y * 50 + 150}}" />
+          <line [class.passed-line]="isPassedVerticalLine(step.id, step.pos)" attr.x1="{{ x * 80 }}" attr.y1="{{y * 50 + 50 }}" attr.x2="{{ x * 80}}"
+            attr.y2="{{y * 50 + 100}}" />
+            <line [class.passed-line]="isPassedVerticalLine(step.id, lot.steps.length)" attr.x1="{{ x * 80 }}" attr.y1="{{ lot.steps.length * 50 + 50 }}" attr.x2="{{ x * 80}}"
+            attr.y2="{{lot.steps.length * 50 + 100}}" />          
         </g>
         <ng-container *ngIf="hasLink(step)">
           <g>
-            <line attr.x1="{{ x * 80}}" attr.y1="{{y * 50 + 100 }}" attr.x2="{{ (x + 1) * 80}}" attr.y2="{{y * 50 + 100}}" />
+            <line [class.passed-line]="isPassedHorizontalLine(step.id, step.pos)" attr.x1="{{ x * 80}}" attr.y1="{{y * 50 + 100 }}" attr.x2="{{ (x + 1) * 80}}" attr.y2="{{y * 50 + 100}}" />
           </g>
-        </ng-container>
+        </ng-container>        
       </ng-container>
     </g>
     <text attr.x="{{x * 80}}" y="520" font-size="15">
